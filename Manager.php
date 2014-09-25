@@ -141,11 +141,27 @@ class Manager
     public function getUrls($format, $path, $filetype)
     {
 
-        $file = substr($path, strrpos($path, "/") + 1);
-        $filename = substr($file, 0, strrpos($file, "."));
+        $filename = substr($path, strrpos($path, "/") + 1);
 
         $finder = new Finder();
-        $finder->files()->name($filename.'*.'.$filetype)->in($this->imPath . $format );
+
+        $sort = function (\SplFileInfo $a, \SplFileInfo $b)
+        {
+
+            $a_last_dot = strrpos($a->getRealpath(), '.');
+            $a_path_no_dot = substr($a->getRealpath(), 0, $a_last_dot );
+            $a_last_dash = strrpos($a_path_no_dot, '-');
+            $a_position = (int)substr($a_path_no_dot, $a_last_dash + 1 );
+
+            $b_last_dot = strrpos($b->getRealpath(), '.');
+            $b_path_no_dot = substr($b->getRealpath(), 0, $b_last_dot );
+            $b_last_dash = strrpos($b_path_no_dot, '-');
+            $b_position = (int)substr($b_path_no_dot, $b_last_dash + 1 );
+
+            return $a_position - $b_position;
+        };
+
+        $finder->files()->name($filename.'*.'.$filetype)->in($this->imPath . $format )->sort($sort);
 
         $files = [];
 
