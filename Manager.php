@@ -13,6 +13,7 @@ namespace Snowcap\ImBundle;
 
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Kernel;
+use Symfony\Component\Finder\Finder;
 use Snowcap\ImBundle\Wrapper;
 
 use Snowcap\ImBundle\Exception\NotFoundException;
@@ -130,6 +131,31 @@ class Manager
     }
 
     /**
+     * To get the web path for a format
+     *
+     * @param string $format ImBundle format string
+     * @param string $path   Source file path
+     *
+     * @return string
+     */
+    public function getUrls($format, $path, $filetype)
+    {
+
+        $file = substr($path, strrpos($path, "/") + 1);
+        $filename = substr($file, 0, strrpos($file, "."));
+
+        $finder = new Finder();
+        $finder->files()->name($filename.'*.'.$filetype)->in($this->imPath . $format );
+
+        $files = [];
+
+        foreach ($finder as $file) {
+            array_push($files, $this->imPath . $format . '/'.$file->getRelativePathname());
+        }
+        return $files;
+    }
+
+    /**
      * Shortcut to run a "convert" command => creates a new image
      *
      * @param string $format    ImBundle format string
@@ -138,11 +164,28 @@ class Manager
      * @return string
      * @codeCoverageIgnore
      */
-    public function convert($format, $inputfile)
+    public function convert($format, $inputfile, $outputFiletype = NULL)
     {
+
         $this->checkImage($inputfile);
 
-        return $this->wrapper->run("convert", $this->webPath . $inputfile, $this->convertFormat($format), $this->cachePath . $this->pathify($format) . '/' . $inputfile);
+          $outputfile = $inputfile;
+
+        // inputfile is not in cache, we make sure the output file will be in cache
+         if(strpos( $inputfile, $this->cachePath ) === -1){
+            $inputfile  = $this->webPath . $inputfile;
+            $outputfile =  $this->cachePath . $this->pathify($format) . '/' . $outputfile;
+         }
+
+
+        //if output filetype is specified we are changing the $outputfile
+        if($outputFiletype){
+            $filetypeStart = strrpos (  $outputfile  , '.');
+            $outputfile = substr(  $outputfile , 0 , $filetypeStart + 1).$outputFiletype;
+        }
+
+
+        return $this->wrapper->run("convert", $inputfile, $this->convertFormat($format),  $outputfile);
     }
 
     /**
@@ -172,14 +215,18 @@ class Manager
      */
     public function downloadExternalImage($format, $path)
     {
-        $protocol = substr($path, 0, strpos($path, "/"));
-        $newPath = str_replace($protocol . "/", $this->kernel->getRootDir() . '/../web/cache/im/' . $format . '/' . $protocol . '/', $path);
+
+        // Modified to save files into easier folder structure
+
+        $filename = substr($path, strrpos($path, "/") + 1);
+
+        $newPath = $this->kernel->getRootDir() . '/../web/cache/im/' . $format . '/' . $filename;
 
         $this->wrapper->checkDirectory($newPath);
 
         $fp = fopen($newPath, 'w');
 
-        $ch = curl_init(str_replace($protocol . '/', $protocol . '://', $path));
+        $ch = curl_init($path);
         curl_setopt($ch, CURLOPT_FILE, $fp);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($ch, CURLOPT_HEADER, 0);
