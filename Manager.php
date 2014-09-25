@@ -177,13 +177,9 @@ class Manager
             $outputfile =  $this->cachePath . $this->pathify($format) . '/' . $outputfile;
          }
 
-
         //if output filetype is specified we are changing the $outputfile
-        if($outputFiletype){
-            $filetypeStart = strrpos (  $outputfile  , '.');
-            $outputfile = substr(  $outputfile , 0 , $filetypeStart + 1).$outputFiletype;
-        }
-
+        if($outputFiletype)
+            $outputfile = $outputfile.'.'.$outputFiletype;
 
         return $this->wrapper->run("convert", $inputfile, $this->convertFormat($format),  $outputfile);
     }
