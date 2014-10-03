@@ -106,6 +106,7 @@ class Wrapper
 
         /** @var $process \Symfony\Component\Process\Process */
         $process = new $this->processClass($commandString);
+        $process->setTimeout(500);
         $process->run();
 
         if (!$process->isSuccessful()) {

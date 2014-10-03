@@ -197,7 +197,7 @@ class Manager
         if($outputFiletype)
             $outputfile = $outputfile.'.'.$outputFiletype;
 
-        return $this->wrapper->run("convert", $inputfile, $this->convertFormat($format),  $outputfile);
+        return $this->wrapper->run("convert -density 300 -colorspace RGB", $inputfile, $this->convertFormat($format),  $outputfile);
     }
 
     /**
