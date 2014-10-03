@@ -197,7 +197,7 @@ class Manager
         if($outputFiletype)
             $outputfile = $outputfile.'.'.$outputFiletype;
 
-        return $this->wrapper->run("convert -density 300 -colorspace RGB", $inputfile, $this->convertFormat($format),  $outputfile);
+        return $this->wrapper->run("convert -limit memory 1 -limit map 1 -density 300", $inputfile, $this->convertFormat($format),  $outputfile);
     }
 
     /**
