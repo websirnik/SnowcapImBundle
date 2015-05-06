@@ -232,7 +232,7 @@ class Manager
 
         $filename = substr($path, strrpos($path, "/") + 1);
 
-        $newPath = $this->kernel->getRootDir() . '/../web/cache/im/' . $format . '/' . $filename;
+        $newPath = $this->kernel->getRootDir() . '/../web/cache/im/' . $format . '/' . generateRandomString() .'-'. $filename;
 
         $this->wrapper->checkDirectory($newPath);
 
@@ -248,6 +248,10 @@ class Manager
         fclose($fp);
 
         return $newPath;
+    }
+
+    public function generateRandomString($length = 10) {
+        return substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, $length);
     }
 
     /**
