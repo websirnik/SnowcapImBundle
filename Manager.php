@@ -232,7 +232,7 @@ class Manager
 
         $filename = substr($path, strrpos($path, "/") + 1);
 
-        $newPath = $this->kernel->getRootDir() . '/../web/cache/im/' . $format . '/' . generateRandomString() .'-'. $filename;
+        $newPath = $this->kernel->getRootDir() . '/../web/cache/im/' . $format . '/' . $this->generateRandomString() .'-'. $filename;
 
         $this->wrapper->checkDirectory($newPath);
 
